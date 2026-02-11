@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-br" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Missão Férias | PREMIUM ✨</title>
+    <!-- Montserrat Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+    <canvas id="confetti-canvas"></canvas>
+
+    <div class="app-container">
+        <header>
+            <div class="header-left">
+                <h1>Missão Férias ❤️🌸</h1>
+                <div class="stats-bar">
+                    <span id="completed-count">0</span> / <span id="total-count">0</span> CONCLUÍDAS • <span id="points-counter">0</span> PTS
+                </div>
+            </div>
+            <div class="header-actions">
+                <button id="reset-btn" class="action-btn" title="Reiniciar Progresso">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <div class="progress-wrapper">
+            <div id="progress-bar" class="progress-fill"></div>
+        </div>
+
+        <main id="mission-grid" class="bento-grid">
+            <!-- Missions rendered by JS -->
+        </main>
+
+        <footer>
+            <p class="footer-phrase">"Cada pequena coisa que você faz me deixa mais orgulhoso de você. Aproveite seu momento! ❤️"</p>
+            <p id="daily-quote">"Preparando algo especial..."</p>
+        </footer>
+    </div>
+
+    <!-- Modal Structure -->
+    <div id="mission-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="close-modal">&times;</button>
+            <div id="modal-body">
+                <!-- Content injected by JS -->
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
