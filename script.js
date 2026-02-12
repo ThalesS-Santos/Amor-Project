@@ -180,6 +180,9 @@ function initAuth() {
                 alert("Bem-vindo, Admin! 🛠️");
             }
 
+            // Update Profile Info for Admin Visibility
+            updateUserProfile(user);
+
             loadProgress();
         } else {
             currentUser = null;
@@ -210,6 +213,20 @@ async function signOutUser() {
         } catch (error) {
             console.error("Erro ao sair:", error);
         }
+    }
+}
+
+async function updateUserProfile(user) {
+    if (!userDocRef) return;
+    try {
+        await setDoc(userDocRef, {
+            displayName: user.displayName,
+            email: user.email,
+            photoURL: user.photoURL,
+            lastLogin: new Date()
+        }, { merge: true });
+    } catch (e) {
+        console.error("Erro ao atualizar perfil:", e);
     }
 }
 
@@ -744,19 +761,30 @@ function toggleAdminPanel() {
 async function loadAllUsers() {
     const list = document.getElementById('admin-users-list');
     list.innerHTML = 'Carregando...';
-    
+
     try {
         const querySnapshot = await getDocs(collection(db, "tracker"));
         list.innerHTML = '';
-        
+
         querySnapshot.forEach((doc) => {
             const userData = doc.data();
             const btn = document.createElement('button');
             btn.className = 'user-card-btn';
-            // Try to find a name or use ID
-            const name = userData.lastUpdated ? `User (Atualizado: ${new Date(userData.lastUpdated.seconds * 1000).toLocaleDateString()})` : doc.id;
             
-            btn.textContent = name;
+            // Name Display Logic
+            // Prioritize displayName, then email, then ID
+            let nameLabel = userData.displayName || userData.email || doc.id;
+            
+            // Date formatting
+            let dateStr = '???';
+            if (userData.lastLogin) {
+                dateStr = new Date(userData.lastLogin.seconds * 1000).toLocaleDateString();
+            } else if (userData.lastUpdated) {
+                dateStr = new Date(userData.lastUpdated.seconds * 1000).toLocaleDateString();
+            }
+
+            btn.innerHTML = `<strong>${nameLabel}</strong> <br> <span style="font-size:0.8em">Visto: ${dateStr}</span>`;
+            
             btn.onclick = () => viewUserProgress(doc.id, userData);
             list.appendChild(btn);
         });
