@@ -108,7 +108,13 @@ body::before {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s, visibility 0.3s;
+}
+
+.sidebar-toggle-btn.hidden-btn {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
 }
 
 .sidebar-toggle-btn:hover {
@@ -118,6 +124,12 @@ body::before {
 .app-sidebar {
     width: 280px;
     background: linear-gradient(180deg, var(--sidebar-bg) 0%, #560027 100%);
+    /* Cute Pattern Overlay */
+    background-image: radial-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+                      radial-gradient(rgba(255,255,255,0.1) 1px, transparent 1px);
+    background-size: 20px 20px;
+    background-position: 0 0, 10px 10px;
+    
     color: var(--sidebar-text);
     display: flex;
     flex-direction: column;
@@ -136,6 +148,57 @@ body::before {
 
 .app-sidebar.collapsed {
     margin-left: -280px; /* Slide out of view */
+}
+
+/* --- Custom Alert Styling --- */
+.custom-alert-content {
+    background: linear-gradient(135deg, #fff5f7 0%, #fff 100%);
+    padding: 40px;
+    border-radius: 30px;
+    width: 90%;
+    max-width: 450px;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 25px 50px rgba(201, 24, 74, 0.25);
+    border: 2px solid var(--accent-gold);
+    animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+    0% { transform: scale(0.5); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.alert-decoration {
+    font-size: 2rem;
+    margin-bottom: 5px;
+    color: var(--accent-gold);
+    text-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.custom-alert-content h2 {
+    color: var(--accent-red);
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+    font-weight: 800;
+}
+
+.custom-alert-content p {
+    font-size: 1.1rem;
+    color: var(--text-main);
+    line-height: 1.6;
+    margin-bottom: 30px;
+}
+
+.custom-alert-content .btn-primary {
+    width: 100%;
+    background: linear-gradient(90deg, var(--accent-pink) 0%, var(--accent-red) 100%);
+    box-shadow: 0 5px 15px rgba(201, 24, 74, 0.4);
+}
+
+.custom-alert-content .btn-primary:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(201, 24, 74, 0.5);
 }
 
 .app-content {
@@ -203,8 +266,8 @@ body::before {
 }
 
 .nav-item {
-    background: transparent;
-    border: none;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.05);
     color: var(--sidebar-text);
     padding: 12px 18px;
     text-align: left;
@@ -220,15 +283,17 @@ body::before {
 
 .nav-item:hover {
     background-color: var(--sidebar-hover);
+    border-color: rgba(201, 24, 74, 0.2);
     transform: translateX(5px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
 }
 
 .nav-item.active {
     background-color: var(--sidebar-active);
     color: var(--sidebar-active-text);
     font-weight: 700;
-    box-shadow: 0 0 15px rgba(255, 215, 0, 0.1);
-    border: 1px solid rgba(255, 215, 0, 0.2);
+    box-shadow: 0 4px 15px rgba(201, 24, 74, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .nav-item .icon {
@@ -343,30 +408,47 @@ body::before {
     height: 100%; /* Fill the container */
     overflow: hidden; /* No scroll */
     padding-bottom: 0;
+    grid-auto-flow: column; /* FILLS BY COLUMN: 1&2=Col1, 3&4=Col2, 5&6=Col3 */
 }
 
 .mission-card {
     background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-top: 3px solid var(--accent-gold); /* Gold top border */
-    border-radius: 35px; /* Increased radius */
+    border: 2px solid rgba(255, 143, 163, 0.2); /* Soft Pink Border */
+    border-radius: 35px; /* Enforced Radius */
     position: relative;
-    overflow: hidden;
+    overflow: hidden; /* Strict overflow */
     cursor: pointer;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     box-shadow: var(--soft-shadow);
     display: flex;
-    flex-direction: column;
+    flex-direction: column; 
     justify-content: flex-end; 
     padding: 20px;
     height: 100%; 
     backdrop-filter: blur(8px);
+    /* Fix for Safari/Chrome overflow radius bug */
+    -webkit-mask-image: -webkit-radial-gradient(white, black);
 }
 
 .mission-card:hover {
     transform: scale(1.02);
-    box-shadow: 0 15px 40px rgba(212, 175, 55, 0.2), 0 0 20px rgba(255, 179, 193, 0.4);
-    border-color: var(--accent-gold);
+    /* Vibrant Pink/Gold Glow */
+    border-color: var(--accent-pink);
+    box-shadow: 0 15px 40px rgba(255, 77, 109, 0.3), 0 0 20px rgba(212, 175, 55, 0.4);
+}
+
+.card-bg-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    opacity: 1; 
+    z-index: 0;
+    transition: transform 0.5s;
+    border-radius: 35px; /* Match Parent */
 }
 
 @keyframes cardPulse {
@@ -554,8 +636,8 @@ body::before {
     position: fixed;
     top: 0; left: 0; 
     width: 100%; height: 100%;
-    background: rgba(45, 12, 21, 0.4); /* Darker, tinted overlay */
-    backdrop-filter: blur(12px); /* Premium blur effect */
+    background: rgba(45, 12, 21, 0.4); 
+    backdrop-filter: blur(10px); /* Explicit 10px blur */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -563,6 +645,23 @@ body::before {
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.4s ease;
+}
+
+.photo-upload-label {
+    display: block;
+    background: #d00000; /* Solid Cherry Red */
+    padding: 15px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 800; /* Bold */
+    color: #ffffff; /* Pure White */
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.4); /* Text Pop */
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 15px rgba(208, 0, 0, 0.3);
+    border: none;
+    margin-bottom: 0;
+    text-align: center;
+    letter-spacing: 0.5px;
 }
 
 .modal-overlay.active {
@@ -739,12 +838,12 @@ footer {
 }
 
 .btn-primary {
-    background: var(--accent-pink);
-    color: white;
+    background: #c9184a; /* Strong Pink/Red */
+    color: #ffffff !important; /* Force White */
     border: none;
     padding: 15px;
     border-radius: 20px;
-    font-weight: 800;
+    font-weight: 800; /* Bold */
     cursor: pointer;
     transition: all 0.3s;
     font-size: 1rem;
@@ -752,7 +851,8 @@ footer {
     align-items: center;
     justify-content: center;
     gap: 10px;
-    box-shadow: 0 5px 15px rgba(255, 179, 193, 0.4);
+    box-shadow: 0 5px 15px rgba(201, 24, 74, 0.4);
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
 }
 
 .btn-primary:hover {

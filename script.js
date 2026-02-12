@@ -265,8 +265,20 @@ window.navigateTo = function(viewId) {
 
 function toggleSidebar() {
     const sidebar = document.getElementById('main-sidebar');
+    const toggleBtn = document.getElementById('sidebar-toggle');
+    
     if (sidebar) {
         sidebar.classList.toggle('collapsed');
+        const isCollapsed = sidebar.classList.contains('collapsed');
+        
+        // Hide toggle button when sidebar is OPEN (not collapsed)
+        if (toggleBtn) {
+            if (!isCollapsed) {
+                toggleBtn.classList.add('hidden-btn');
+            } else {
+                toggleBtn.classList.remove('hidden-btn');
+            }
+        }
     }
 }
 
@@ -433,6 +445,17 @@ function openModal(mission) {
     const completedEntry = completedMissions.find(cm => (cm.id === mission.id) || (cm === mission.id));
     const isCompleted = !!completedEntry;
     
+    // Celebration Effect on Open ✨
+    confetti({
+        particleCount: 30,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#ffb3c1', '#ff4d6d', '#d4af37'],
+        shapes: ['circle', 'heart'],
+        scalar: 1.2
+    });
+
+    
     const potentialPoints = calculatePoints(mission.shift, true); // Assuming photo
     
     body.innerHTML = `
@@ -558,15 +581,70 @@ function toggleMission(id, missionPoints, photoUrl = null) {
     checkMilestones(); // Check if this completion triggers a big event
 }
 
+const dailyMotivation = {
+    1: "O começo é a parte mais importante. Estou orgulhoso de você! ❤️",
+    2: "Você é mais forte do que imagina. Continue brilhando! ✨",
+    3: "Cada passo seu é uma vitória. Te admiro tanto! 🌹",
+    4: "Seu sorriso ilumina meu mundo. Não desista! ☀️",
+    5: "Estamos na metade! Você é incrível, meu amor! 🚀",
+    6: "Sua dedicação me inspira todos os dias. Te amo! 💖",
+    7: "Falta pouco! Você está fazendo tudo com tanto carinho... 🥰",
+    8: "Você é a mulher da minha vida. Continue firme! 💍",
+    9: "Quase lá! Sinto seu amor em cada missão completada. 🎆",
+    10: "Último dia! Prepare-se para o nosso reencontro! 👩‍❤️‍👨"
+};
+
+// --- Custom Alert System ---
+function showCustomAlert(title, message, callback) {
+    const modal = document.getElementById('custom-alert');
+    if (!modal) {
+        alert(message); // Fallback
+        if (callback) callback();
+        return;
+    }
+
+    document.getElementById('alert-title').textContent = title;
+    document.getElementById('alert-message').innerHTML = message.replace(/\n/g, '<br>');
+    
+    modal.classList.remove('hidden');
+    modal.classList.add('active'); // Reusing active class from other modals if exists, or ensures visibility
+
+    const btn = document.getElementById('alert-ok-btn');
+    
+    // Remove old listeners to avoid stacking
+    const newBtn = btn.cloneNode(true);
+    btn.parentNode.replaceChild(newBtn, btn);
+    
+    newBtn.onclick = () => {
+        modal.classList.add('hidden');
+        modal.classList.remove('active');
+        if (callback) callback();
+    };
+    
+    // Premium Sound trigger if available
+    try { playShimmer(); } catch(e) {}
+}
+
 function advanceDay() {
     if (currentDay < 10) {
         currentDay++;
         saveProgress();
         renderMissions();
         updateUI();
-        alert(`Bem-vinda ao Dia ${currentDay}! Novas missões desbloqueadas! ❤️`);
+        
+        const msg = dailyMotivation[currentDay] || "Um novo dia cheio de amor para você! ❤️";
+        
+        showCustomAlert(
+            `Bem-vinda ao Dia ${currentDay}! ✨`, 
+            msg, 
+            () => checkMilestones() // Check milestones AFTER closing alert
+        );
+        
     } else {
-        alert("Você completou toda a jornada de 10 dias! Te amo mil milhões! ❤️");
+        showCustomAlert(
+            "Parabéns! 🥂",
+            "Você completou toda a jornada de 10 dias! Te amo mil milhões! ❤️"
+        );
     }
 }
 
