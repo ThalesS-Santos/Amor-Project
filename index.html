@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-br" data-theme="dark">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +7,7 @@
     <!-- Montserrat Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Courier+New&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <!-- Canvas Confetti -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -15,45 +15,190 @@
 <body>
     <canvas id="confetti-canvas"></canvas>
 
-    <div id="app-container" class="app-container hidden">
-        <header>
-            <div class="header-left">
-                <h1>Missão Férias ❤️🌸</h1>
-                <div class="stats-bar">
-                    <span id="completed-count">0</span> / <span id="total-count">0</span> CONCLUÍDAS • <span id="points-counter">0</span> PTS
-                </div>
-            </div>
-            <div class="header-actions">
-                <button id="reset-btn" class="action-btn" title="Reiniciar Progresso">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>
-                    </svg>
-                </button>
-            </div>
-        </header>
-
-        <div class="progress-wrapper">
-            <div id="progress-bar" class="progress-fill"></div>
+    <!-- Login Screen -->
+    <div id="login-screen" class="login-container">
+        <div class="login-box">
+            <h1>Missão Férias ❤️</h1>
+            <p>Sua jornada de amor e cuidado começa aqui.</p>
+            <button id="login-btn" class="google-btn">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google Logo">
+                Entrar com Google
+            </button>
         </div>
-
-        <main id="mission-grid" class="bento-grid">
-            <!-- Missions rendered by JS -->
-        </main>
-
-        <footer>
-            <p class="footer-phrase">"Cada pequena coisa que você faz me deixa mais orgulhoso de você. Aproveite seu momento! ❤️"</p>
-            <p id="daily-quote">"Preparando algo especial..."</p>
-        </footer>
     </div>
 
-    <!-- Modal Structure -->
+    <!-- App Layout (Hidden until login) -->
+    <div id="app-container" class="app-layout hidden">
+        
+        <!-- Sidebar Toggle Button (Floating) -->
+        <button id="sidebar-toggle" class="sidebar-toggle-btn" title="Menu">
+            ❤️
+        </button>
+
+        <!-- Sidebar Navigation -->
+        <aside id="main-sidebar" class="app-sidebar collapsed">
+            <div class="sidebar-header">
+                <h2>Missão Férias</h2>
+                <button id="close-sidebar-btn" class="icon-btn-small">✖️</button>
+            </div>
+            <nav class="sidebar-nav">
+                <button class="nav-item active" onclick="window.navigateTo('home')">
+                    <span class="icon">🏠</span> Página Principal
+                </button>
+                <button class="nav-item" onclick="window.navigateTo('memories')">
+                    <span class="icon">📸</span> Nossas Memórias
+                </button>
+                <button class="nav-item" onclick="window.navigateTo('rules')">
+                    <span class="icon">📜</span> Regras
+                </button>
+            </nav>
+            <div class="sidebar-footer">
+                <button id="logout-btn" class="nav-item">
+                    <span class="icon">🚪</span> Sair
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="app-content">
+            
+            <!-- View: Home (Mission Grid) -->
+            <section id="view-home" class="view-section active">
+                <header class="top-header">
+                    <div class="header-left">
+                        <div id="day-wrapper">
+                            <h2 id="day-header">Dia 1 de 10</h2>
+                        </div>
+                        <div class="stats-bar">
+                            <span id="completed-count">0</span> / <span id="total-count">0</span> CONCLUÍDAS • <span id="points-counter">0</span> PTS
+                        </div>
+                    </div>
+                    <div class="header-actions">
+                        <button id="next-day-btn" class="action-btn" title="Próximo Dia" style="display: none;">➡️</button>
+                    </div>
+                </header>
+
+                <div class="progress-wrapper">
+                    <div id="progress-bar" class="progress-fill"></div>
+                </div>
+
+                <div id="mission-grid" class="bento-grid">
+                    <!-- Missions rendered by JS -->
+                </div>
+
+                <footer>
+                    <p class="footer-phrase">"Cada pequena coisa que você faz me deixa mais orgulhoso de você. Aproveite seu momento! ❤️"</p>
+                    <p id="daily-quote">"Preparando algo especial..."</p>
+                </footer>
+            </section>
+
+            <!-- View: Memories (Gallery) -->
+            <section id="view-memories" class="view-section hidden">
+                <header class="view-header">
+                    <h2>Galeria de Memórias 📸</h2>
+                    <p>Todos os momentos especiais que você registrou.</p>
+                </header>
+                <div id="memories-grid" class="memories-grid">
+                    <!-- Memories rendered JS -->
+                    <p class="empty-state">Ainda não há memórias. Complete missões com fotos para encher este álbum! ❤️</p>
+                </div>
+            </section>
+
+            <!-- View: Rules -->
+            <section id="view-rules" class="view-section hidden">
+                <header class="view-header">
+                    <h2>Como Funciona 📜</h2>
+                </header>
+                <div class="rules-content">
+                    <div class="rule-card">
+                        <h3>1. O Objetivo 🎯</h3>
+                        <p>Completar 10 dias de missões de autocuidado e amor. Dedique um tempo para você mesma todos os dias.</p>
+                    </div>
+                    <div class="rule-card">
+                        <h3>2. Pontuação 🏆</h3>
+                        <ul>
+                            <li><strong>100 Pts:</strong> Missão feita no turno certo + FOTO 📸</li>
+                            <li><strong>50 Pts:</strong> Missão feita no turno certo (Sem foto)</li>
+                            <li><strong>50 Pts:</strong> Missão feita fora do turno + FOTO 📸</li>
+                            <li><strong>25 Pts:</strong> Missão feita fora do turno (Sem foto)</li>
+                        </ul>
+                    </div>
+                    <div class="rule-card">
+                        <h3>3. Fotos & Memórias 🖼️</h3>
+                        <p>As fotos que você tira são salvas na aba "Nossas Memórias". É o nosso álbum particular!</p>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Modals -->
     <div id="mission-modal" class="modal-overlay">
         <div class="modal-content">
-            <button class="close-modal">&times;</button>
+            <span class="close-modal">&times;</span>
             <div id="modal-body">
                 <!-- Content injected by JS -->
             </div>
         </div>
+    </div>
+
+    <!-- Milestone 5: Halfway -->
+    <div id="milestone-5" class="milestone-overlay hidden">
+        <div class="milestone-content">
+            <h1 class="milestone-title">5 Dias de Saudades e Muito Amor! ❤️</h1>
+            <p class="milestone-msg">
+                Olha só onde chegamos, meu amor! Metade do caminho já foi. <br>
+                Cada missão que você fez me deixou mais orgulhoso da mulher incrível que você é. <br>
+                Falta pouco para estarmos juntos novamente! ✨
+            </p>
+            <div class="emoji-rain-container"></div>
+            <button class="btn-primary" onclick="closeMilestone(5)">
+                Continuar para o Dia 6 ✨
+            </button>
+        </div>
+    </div>
+
+    <!-- Milestone 10: Reunion -->
+    <div id="milestone-10" class="milestone-overlay hidden premium-overlay">
+        <div class="parallax-bg"></div>
+        <div class="milestone-content premium-content">
+            <h1 class="milestone-title">VOCÊ CONSEGUIU! 🎉</h1>
+            <h2 class="milestone-subtitle">A Próxima Missão é o Nosso Abraço! 👩‍❤️‍👨</h2>
+            
+            <p class="milestone-msg">
+                Foram 10 dias, 60 missões e um milhão de sorrisos. <br>
+                Você completou cada desafio com todo carinho, e agora a contagem regressiva chegou ao fim. <br>
+                O seu prêmio não cabe em um site: sou eu chegando para te amar! ❤️
+            </p>
+
+            <!-- Memory Carousel -->
+            <div class="memory-carousel-wrapper">
+                <h3>Sua Jornada Inesquecível 👇</h3>
+                <div id="final-carousel" class="memory-carousel">
+                    <!-- Photos injected by JS -->
+                </div>
+            </div>
+
+            <button class="btn-primary gold-btn" onclick="closeMilestone(10)">
+                ❤️ Correr para o Abraço ❤️
+            </button>
+        </div>
+    </div>
+
+    <div id="polaroid-modal" class="modal-overlay">
+        <div class="polaroid-content">
+            <button class="close-polaroid">✖️</button>
+            <div class="polaroid-frame">
+                <img id="polaroid-img" src="" alt="Memória">
+                <p id="polaroid-caption">Legenda</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="loading-overlay" class="hidden">
+        <div class="heart-spinner"></div>
     </div>
 
     <!-- Import Map for Firebase -->
@@ -63,23 +208,11 @@
             "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
             "firebase/firestore": "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js",
             "firebase/analytics": "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js",
-            "firebase/auth": "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js"
+            "firebase/auth": "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js",
+            "firebase/storage": "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js"
         }
     }
     </script>
-
-    <!-- Login Screen -->
-    <div id="login-screen" class="login-container">
-        <div class="login-box">
-            <h1>Missão Férias ❤️</h1>
-            <p>Entre para acessar sua jornada especial</p>
-            <button id="login-btn" class="google-btn">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google Logo">
-                Entrar com Google
-            </button>
-        </div>
-    </div>
-
     <script type="module" src="script.js"></script>
 </body>
 </html>
