@@ -15,7 +15,7 @@
 <body>
     <canvas id="confetti-canvas"></canvas>
 
-    <div class="app-container">
+    <div id="app-container" class="app-container hidden">
         <header>
             <div class="header-left">
                 <h1>Missão Férias ❤️🌸</h1>
@@ -56,6 +56,30 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <!-- Import Map for Firebase -->
+    <script type="importmap">
+    {
+        "imports": {
+            "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
+            "firebase/firestore": "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js",
+            "firebase/analytics": "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js",
+            "firebase/auth": "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js"
+        }
+    }
+    </script>
+
+    <!-- Login Screen -->
+    <div id="login-screen" class="login-container">
+        <div class="login-box">
+            <h1>Missão Férias ❤️</h1>
+            <p>Entre para acessar sua jornada especial</p>
+            <button id="login-btn" class="google-btn">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google Logo">
+                Entrar com Google
+            </button>
+        </div>
+    </div>
+
+    <script type="module" src="script.js"></script>
 </body>
 </html>
