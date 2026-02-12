@@ -127,20 +127,47 @@ header h1 {
 /* Bento Grid */
 .bento-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Flexible columns */
-    grid-auto-rows: 1fr; /* Make rows occupy equal height */
-    gap: 15px; /* Smaller gap */
-    flex-grow: 1; /* Maximizes space */
+    /* Desktop: 3 columns fixed (Morning, Afternoon, Night) */
+    grid-template-columns: repeat(3, 1fr);
+    /* Force 2 rows to create the 2x3 matrix feel */
+    grid-template-rows: repeat(2, 1fr);
+    /* Fill columns vertically first (col 1, col 2, col 3) */
+    grid-auto-flow: column;
+    gap: 15px;
+    flex-grow: 1;
     width: 100%;
     height: 100%;
-    overflow: hidden; /* Prevent internal scroll */
+    overflow: hidden;
     padding: 10px 0;
+}
+
+/* Responsive Grid */
+@media (max-width: 1024px) {
+    .bento-grid {
+        /* Tablet: 2 columns */
+        grid-template-columns: repeat(2, 1fr);
+        /* Revert to standard row flow for smaller screens */
+        grid-auto-flow: row;
+        grid-template-rows: auto; 
+    }
+}
+
+@media (max-width: 768px) {
+    .bento-grid {
+        /* Mobile: 1 column */
+        grid-template-columns: 1fr;
+        grid-auto-flow: row;
+        grid-template-rows: auto;
+        /* Allow scroll on mobile */
+        overflow-y: auto; 
+        padding-bottom: 20px; /* Safe area */
+    }
 }
 
 /* Floating Animation */
 @keyframes float {
     0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-3px); } /* Reduced float distance */
+    50% { transform: translateY(-3px); }
 }
 
 .mission-card {
