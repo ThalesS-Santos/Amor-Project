@@ -157,11 +157,17 @@ const successMessages = [
 // --- Auth Functions ---
 
 function initAuth() {
+    console.log("Inicializando autenticação..."); // Debug
     const loginScreen = document.getElementById('login-screen');
     const appContainer = document.getElementById('app-container');
     const loginBtn = document.getElementById('login-btn');
 
-    loginBtn.addEventListener('click', signInWithGoogle);
+    if(loginBtn) {
+        console.log("Botão de login encontrado, adicionando listener.");
+        loginBtn.addEventListener('click', signInWithGoogle);
+    } else {
+        console.error("ERRO: Botão de login não encontrado!");
+    }
 
     onAuthStateChanged(auth, (user) => {
         if (user) {
@@ -174,10 +180,11 @@ function initAuth() {
             console.log("Usuário logado:", user.displayName);
             
             // Admin Check
+
             if (user.email === 'thalessena272006@gmail.com') {
                 isAdmin = true;
                 initAdminUI();
-                alert("Bem-vindo, Admin! 🛠️");
+                showCustomAlert("Olá, Chefe! 🛠️", "Painel Administrativo liberado para você.");
             }
 
             // Update Profile Info for Admin Visibility
@@ -197,23 +204,29 @@ function initAuth() {
 }
 
 async function signInWithGoogle() {
+    console.log("Tentando logar com Google..."); // Debug log
     try {
-        await signInWithPopup(auth, provider);
+        const result = await signInWithPopup(auth, provider);
+        console.log("Login bem sucedido:", result.user.displayName);
     } catch (error) {
         console.error("Erro ao logar:", error);
-        alert("Erro ao fazer login. Tente novamente.");
+        showCustomAlert("Ops!", `Erro ao fazer login: ${error.message}`);
     }
 }
 
 async function signOutUser() {
-    if (confirm("Deseja mesmo sair?")) {
-        try {
-            await signOut(auth);
-            location.reload();
-        } catch (error) {
-            console.error("Erro ao sair:", error);
+    showCustomConfirm(
+        "Sair da Conta?",
+        "Deseja mesmo sair? Sentirei saudades! 🥺",
+        async () => {
+            try {
+                await signOut(auth);
+                location.reload();
+            } catch (error) {
+                console.error("Erro ao sair:", error);
+            }
         }
-    }
+    );
 }
 
 async function updateUserProfile(user) {
@@ -375,7 +388,7 @@ async function uploadMissionPhoto(file, missionId) {
         return url;
     } catch (error) {
         console.error("Upload error:", error);
-        alert("Erro ao enviar foto. Tente novamente!");
+        showCustomAlert("Erro de Upload", "Não foi possível enviar a foto. Tente novamente! 😔");
         return null;
     } finally {
         loadingOverlay.classList.add('hidden');
@@ -421,18 +434,36 @@ function renderMissions() {
     todaysMissions.forEach(mission => {
         const isCompleted = completedMissions.some(cm => (cm.id === mission.id) || (cm === mission.id));
         const card = document.createElement('div');
-        card.className = `mission-card ${isCompleted ? 'completed' : ''}`;
-        
-        // Fallback gradient logic if image fails
-        const img = new Image();
-        img.src = mission.image;
-        
+        card.className = `mission-card ${isCompleted ? 'completed' : ''}`;        
         card.innerHTML = `
-            <div class="card-bg-overlay" style="background-image: url('${mission.image}')" 
-                 onerror="this.style.background='linear-gradient(135deg, #ffb3c1 0%, #d4af37 100%)'; this.innerHTML='<div class=\'fallback-icon\'>✨</div>';"></div>
+            <div class="loading-placeholder" id="loader-${mission.id}"></div>
+            <div class="card-bg-overlay" id="bg-${mission.id}" style="opacity: 0"></div>
             <div class="shift-icon" title="Turno: ${mission.shift}">${mission.icon}</div>
             <h3>${mission.title}</h3>
         `;
+        
+        // Image Preload Logic
+        const img = new Image();
+        img.src = mission.image;
+        img.onload = () => {
+            const loader = document.getElementById(`loader-${mission.id}`);
+            const bg = document.getElementById(`bg-${mission.id}`);
+            if (loader) loader.style.display = 'none';
+            if (bg) {
+                bg.style.backgroundImage = `url('${mission.image}')`;
+                bg.style.opacity = '1';
+            }
+        };
+        img.onerror = () => {
+             const loader = document.getElementById(`loader-${mission.id}`);
+             const bg = document.getElementById(`bg-${mission.id}`);
+             if(loader) loader.style.display = 'none';
+             if(bg) {
+                 bg.style.background = 'linear-gradient(135deg, #ffb3c1 0%, #d4af37 100%)';
+                 bg.style.opacity = '1';
+                 bg.innerHTML = '<div class="fallback-icon">✨</div>';
+             }
+        };
         
         card.onclick = () => openModal(mission);
         grid.appendChild(card);
@@ -540,13 +571,17 @@ function openModal(mission) {
 
         // 2. Complete without Photo
         btnNoPhoto.onclick = () => {
-            if(confirm("Tem certeza? Enviar uma foto guarda o momento para sempre e vale o dobro de pontos! 📸")) {
-                const pts = calculatePoints(mission.shift, false);
-                toggleMission(mission.id, pts, null); // No photo
-                closeModal();
-                showSuccessAlert();
-                successSound.play().catch(e => console.log(e));
-            }
+            showCustomConfirm(
+                "Sem foto? 📸",
+                "Tem certeza? Enviar uma foto guarda o momento para sempre e vale o dobro de pontos! ✨",
+                () => {
+                    const pts = calculatePoints(mission.shift, false);
+                    toggleMission(mission.id, pts, null); // No photo
+                    closeModal();
+                    showSuccessAlert();
+                    successSound.play().catch(e => console.log(e));
+                }
+            );
         };
     }
 
@@ -625,8 +660,51 @@ function showCustomAlert(title, message, callback) {
     try { playShimmer(); } catch(e) {}
 }
 
+function showCustomConfirm(title, message, onYes, onNo) {
+    const modal = document.getElementById('custom-confirm');
+    if (!modal) {
+        if(confirm(message)) {
+            if(onYes) onYes();
+        } else {
+            if(onNo) onNo();
+        }
+        return;
+    }
+
+    document.getElementById('confirm-title').textContent = title;
+    document.getElementById('confirm-message').innerHTML = message.replace(/\n/g, '<br>');
+    
+    modal.classList.remove('hidden');
+    modal.classList.add('active');
+
+    const yesBtn = document.getElementById('confirm-yes-btn');
+    const noBtn = document.getElementById('confirm-no-btn');
+    
+    // Clean Listeners
+    const newYes = yesBtn.cloneNode(true);
+    const newNo = noBtn.cloneNode(true);
+    yesBtn.parentNode.replaceChild(newYes, yesBtn);
+    noBtn.parentNode.replaceChild(newNo, noBtn);
+    
+    newYes.onclick = () => {
+        modal.classList.add('hidden');
+        modal.classList.remove('active');
+        if (onYes) onYes();
+    };
+    
+    newNo.onclick = () => {
+        modal.classList.add('hidden');
+        modal.classList.remove('active');
+        if (onNo) onNo();
+    };
+    
+    try { playShimmer(); } catch(e) {}
+}
+
+
 function advanceDay() {
     if (currentDay < 10) {
+        // ... (Logic handled inside custom alert flow)
         currentDay++;
         saveProgress();
         renderMissions();
@@ -637,7 +715,7 @@ function advanceDay() {
         showCustomAlert(
             `Bem-vinda ao Dia ${currentDay}! ✨`, 
             msg, 
-            () => checkMilestones() // Check milestones AFTER closing alert
+            () => checkMilestones() 
         );
         
     } else {
@@ -650,7 +728,7 @@ function advanceDay() {
 
 function showSuccessAlert() {
     const msg = successMessages[Math.floor(Math.random() * successMessages.length)];
-    alert(msg);
+    showCustomAlert("Sucesso! 🎉", msg);
 }
 
 function triggerHeartRain() {
@@ -892,14 +970,14 @@ function viewUserProgress(uid, data) {
     document.getElementById('detail-missions').textContent = completedMissions.length;
     
     renderAdminGallery(completedMissions);
-    alert(`Modo Espião Ativo! Você está vendo os dados de outro usuário. O salvamento automático está DESATIVADO.`);
+    showCustomAlert("Modo Espião Ativo! 🕵️‍♂️", "Você está vendo os dados de outro usuário.<br>O salvamento automático está <b>DESATIVADO</b>.");
 }
 
 function exitUserView() {
     viewingOtherUser = false;
     document.getElementById('admin-user-detail').classList.add('hidden');
     loadProgress(); // Reload Admin's own data (or reset)
-    alert("Saiu do Modo Espião. Seus dados foram recarregados.");
+    showCustomAlert("Modo Espião Encerrado", "Seus dados foram recarregados. 🕵️‍♂️");
 }
 
 function renderAdminGallery(missions) {
@@ -941,7 +1019,20 @@ function checkMilestones() {
         return completedMissions.some(cm => (cm.id === m.id) || (cm === m.id));
     }).length;
 
-    // Trigger Day 5: 50%
+    // --- First Mission of the Day Reward ---
+    if (completedDaily === 1) {
+        // Only show if we haven't already shown it this session (optional, but good UX)
+        // For simplicity, we show it. But we must ensure it doesn't block other things.
+        // We defer it slightly to let other animations play.
+        setTimeout(() => {
+             showCustomAlert(
+                "Primeira Conquista! 🥇",
+                "Você começou o dia com tudo! Tenho muito orgulho de você. Continue assim! ❤️"
+            );
+        }, 1000);
+    }
+
+    // --- Day 5: Halfway ---
     if (currentDay === 5 && completedDaily === totalDaily) {
        setTimeout(() => showMilestone(5), 1500); // Small delay for suspense
     }
